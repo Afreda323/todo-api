@@ -7,6 +7,9 @@ const Todo = require("./models/todo");
 const User = require("./models/user");
 
 const app = express();
+
+const port = process.env.PORT || 3000;
+
 app.use(bodyParser.json());
 
 app.post("/todos", (req, res) => {
@@ -43,8 +46,8 @@ app.get("/todos/:id", (req, res) => {
     })
     .catch(err => res.status(404).json({ error: "There was a problem" }));
 });
-app.listen(3000, () => {
-  console.log("Up on 3000");
+app.listen(port, () => {
+  console.log(`Up on ${port}`);
 });
 
 module.exports = app;
