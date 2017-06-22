@@ -42,4 +42,10 @@ router.post("/login", (req, res) => {
   })
 });
 
+router.delete('/me/token', requireAuth,  (req, res) => {
+    req.user.removeToken(req.token).then(() => {
+        res.status(200).send()
+    })
+})
+
 module.exports = router;

@@ -198,47 +198,72 @@ describe("USER routes", () => {
         });
     });
     it("Should return validation errors on bad request", done => {
-      request(app).post("/users").send({email: 'lol'}).expect(400).end(done);
+      request(app).post("/users").send({ email: "lol" }).expect(400).end(done);
     });
     it("Should not allow dupe user", done => {
-        const email = "ayy2@lol.com";
-        const password = "abc123";
-        request(app).post("/users").send({email, password}).expect(400).end(done);
+      const email = "ayy2@lol.com";
+      const password = "abc123";
+      request(app)
+        .post("/users")
+        .send({ email, password })
+        .expect(400)
+        .end(done);
     });
   });
-  describe('POST /users/login', () => {
-      it('Should log user in and return auth token', done => {
-        request(app)
-        .post('/users/login')
+  describe("POST /users/login", () => {
+    it("Should log user in and return auth token", done => {
+      request(app)
+        .post("/users/login")
         .send({
-            email: users[1].email,
-            password: users[1].password
+          email: users[1].email,
+          password: users[1].password
         })
         .expect(200)
         .expect(res => {
-            expect(res.headers['x-auth']).toExist()
+          expect(res.headers["x-auth"]).toExist();
         })
         .end((err, res) => {
-            if(err){
-                return done(err)
-            }
-            User.findById(users[1]._id).then(user => {
-                expect(user.tokens[0]).toInclude({
-                    access: 'auth',
-                    token: res.headers['x-auth']
-                })
-                done()
-            }).catch(e => done(e))
-        })
-      })
-      it('Should reject invalid login', done => {
-            request(app)
-            .post('/users/login')
-            .expect(400)
-            .expect(res => {
-                expect(res.body.user).toNotExist()
+          if (err) {
+            return done(err);
+          }
+          User.findById(users[1]._id)
+            .then(user => {
+              expect(user.tokens[0]).toInclude({
+                access: "auth",
+                token: res.headers["x-auth"]
+              });
+              done();
             })
-            .end(done)
-      })
-  })
+            .catch(e => done(e));
+        });
+    });
+    it("Should reject invalid login", done => {
+      request(app)
+        .post("/users/login")
+        .expect(400)
+        .expect(res => {
+          expect(res.body.user).toNotExist();
+        })
+        .end(done);
+    });
+  });
+  describe("DELETE /users/me/token", () => {
+    it("Should delete token", done => {
+      request(app)
+        .delete("/users/me/token")
+        .set("x-auth", users[0].tokens[0].token)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          User.findById(users[0]._id)
+            .then(user => {
+              expect(user.tokens.length).toBe(0);
+              done();
+            })
+            .catch(e => done(e));
+        });
+    });
+  });
 });
