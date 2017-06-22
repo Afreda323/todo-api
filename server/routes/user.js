@@ -12,14 +12,13 @@ router.post("/", (req, res) => {
     });
     user
       .save()
-      .then( user => {
+      .then(user => {
         return user.generateAuthToken();
       })
-      .then( token => {
+      .then(token => {
         res.header("x-auth", token).json({ user });
       })
-      .catch( e => {
-        console.log(e);
+      .catch(e => {
         res.status(400).json({ error: "Something went wrong" });
       });
   } else {
@@ -28,7 +27,19 @@ router.post("/", (req, res) => {
 });
 
 router.get("/me", requireAuth, (req, res) => {
-    res.json({user: req.user})
-})
+  res.json({ user: req.user });
+});
+
+router.post("/login", (req, res) => {
+  const { email, password } = req.body;
+  User.findByCredentials(email, password, (err, user) => {
+      if(err){
+          return res.status(400).json({error: err})
+      }
+      return user.generateAuthToken().then(token => {
+        res.header("x-auth", token).json({ user });
+      })
+  })
+});
 
 module.exports = router;

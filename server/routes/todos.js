@@ -1,5 +1,6 @@
-const router = require('express').Router();
-
+const router = require("express").Router();
+const {ObjectID} = require('mongodb');
+const _ = require('lodash')
 //  Model Import
 const Todo = require("../models/todo");
 
@@ -52,7 +53,7 @@ router.delete("/:id", (req, res) => {
     .catch(err => res.status(400).json({ error: "There was a problem" }));
 });
 
-router.patch("/todos/:id", (req, res) => {
+router.patch("/:id", (req, res) => {
   const id = req.params.id;
   const body = _.pick(req.body, ["text", "completed"]);
   if (!ObjectID.isValid(id)) {
