@@ -27,7 +27,7 @@ app.post("/todos", (req, res) => {
 });
 
 app.get("/todos", (req, res) => {
-  Todo.find({}, { _id: 0, __v: 0 })
+  Todo.find({}, { __v: 0 })
     .then(todos => res.json({ todos }))
     .catch(err => res.status(400).send({ err: "Smething went wrong" }));
 });
@@ -44,7 +44,21 @@ app.get("/todos/:id", (req, res) => {
       }
       res.json({ todo });
     })
-    .catch(err => res.status(404).json({ error: "There was a problem" }));
+    .catch(err => res.status(400).json({ error: "There was a problem" }));
+});
+app.delete("/todos/:id", (req, res) => {
+  const id = req.params.id;
+  if (!ObjectID.isValid) {
+    return res.status(404).json({ error: "Invalid ID" });
+  }
+  Todo.findByIdAndRemove(id)
+    .then(doc => {
+      if (!doc) {
+        return res.status(404).json({ error: "Doesnt exist" });
+      }
+      res.json(doc);
+    })
+    .catch(err => res.status(400).json({ error: "There was a problem" }));
 });
 app.listen(port, () => {
   console.log(`Up on ${port}`);
