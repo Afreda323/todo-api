@@ -11,7 +11,9 @@ const todos = [
   },
   {
     text: "second",
-    _id: new ObjectID()
+    _id: new ObjectID(),
+    completed: true,
+    completedAt: 333
   }
 ];
 
@@ -128,6 +130,39 @@ describe("TODO Routes", () => {
     });
     it("should return 404 if invalid ID", done => {
       request(app).delete(`/todos/123`).expect(404).end(done);
+    });
+  });
+  describe("PATCH /todos/:id", () => {
+    it("Should Update TODO", done => {
+      const hexID = todos[0]._id.toHexString();
+      request(app)
+        .patch(`/todos/${hexID}`)
+        .send({
+          text: "update",
+          completed: true
+        })
+        .expect(200)
+        .expect(res => {
+          expect(res.body.todo.text).toBe("update");
+          expect(res.body.todo.completed).toBe(true);
+          expect(res.body.todo.completedAt).toBeA("number");
+        })
+        .end(done);
+    });
+    it("Should clear completedAt when todo isnt complete", done => {
+      const hexID2 = todos[1]._id.toHexString();
+      request(app)
+        .patch(`/todos/${hexID2}`)
+        .send({
+          text: "update",
+          completed: false
+        })
+        .expect(200)
+        .expect(res => {
+          expect(res.body.todo.completed).toBe(false);
+          expect(res.body.todo.completedAt).toNotExist();
+        })
+        .end(done);
     });
   });
 });
