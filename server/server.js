@@ -19,7 +19,7 @@ app.post("/todos", (req, res) => {
     });
     todo
       .save()
-      .then(doc => res.json(doc))
+      .then(todo => res.json({todo}))
       .catch(e => res.status(400).send({ error: "Somehting went wrong" }));
   } else {
     res.status(400).send({ error: "Please send some text" });
@@ -48,20 +48,20 @@ app.get("/todos/:id", (req, res) => {
 });
 app.delete("/todos/:id", (req, res) => {
   const id = req.params.id;
-  if (!ObjectID.isValid) {
+  if (!ObjectID.isValid(id)) {
     return res.status(404).json({ error: "Invalid ID" });
   }
   Todo.findByIdAndRemove(id)
-    .then(doc => {
-      if (!doc) {
+    .then(todo => {
+      if (!todo) {
         return res.status(404).json({ error: "Doesnt exist" });
       }
-      res.json(doc);
+      res.json({todo});
     })
     .catch(err => res.status(400).json({ error: "There was a problem" }));
 });
 app.listen(port, () => {
-  console.log(`Up on ${port}`);
+  console.log(`Up on Port:${port} brah`);
 });
 
 module.exports = app;
