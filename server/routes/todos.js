@@ -1,13 +1,17 @@
 const router = require("express").Router();
-const {ObjectID} = require('mongodb');
-const _ = require('lodash')
+const { ObjectID } = require("mongodb");
+const _ = require("lodash");
 //  Model Import
 const Todo = require("../models/todo");
+const requireAuth = require("../middleware/auth");
+
+router.use(requireAuth);
 
 router.post("/", (req, res) => {
   if (req.body.text) {
     const todo = new Todo({
-      text: req.body.text
+      text: req.body.text,
+      _creator: req.user._id
     });
     todo
       .save()
@@ -19,7 +23,7 @@ router.post("/", (req, res) => {
 });
 
 router.get("/", (req, res) => {
-  Todo.find({}, { __v: 0 })
+  Todo.find({ _creator: req.user._id }, { __v: 0 })
     .then(todos => res.json({ todos }))
     .catch(err => res.status(400).send({ err: "Smething went wrong" }));
 });
@@ -29,7 +33,7 @@ router.get("/:id", (req, res) => {
   if (!ObjectID.isValid(id)) {
     return res.status(404).json({ error: "Invalid ID" });
   }
-  Todo.findById(id)
+  Todo.findOne({ _id: id, _creator: req.user._id })
     .then(todo => {
       if (!todo) {
         return res.status(404).json({ error: "Todo doesnt exist" });
@@ -43,7 +47,7 @@ router.delete("/:id", (req, res) => {
   if (!ObjectID.isValid(id)) {
     return res.status(404).json({ error: "Invalid ID" });
   }
-  Todo.findByIdAndRemove(id)
+  Todo.findOneAndRemove({ _id: id, _creator: req.user._id })
     .then(todo => {
       if (!todo) {
         return res.status(404).json({ error: "Doesnt exist" });
@@ -67,8 +71,11 @@ router.patch("/:id", (req, res) => {
     body.completedAt = null;
   }
 
-  Todo.findByIdAndUpdate(
-    id,
+  Todo.findOneAndUpdate(
+    {
+      _id: id,
+      _creator: req.user._id
+    },
     {
       $set: body
     },
