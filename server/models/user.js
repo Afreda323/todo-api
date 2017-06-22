@@ -9,10 +9,10 @@ const _ = require("lodash");
 const userSchema = new Schema({
   email: {
     type: String,
+    unique: true,
     minlength: 1,
     trim: true,
     required: true,
-    unique: true,
     validate: {
       isAsync: true,
       validator: validator.isEmail,
@@ -40,7 +40,7 @@ const userSchema = new Schema({
 userSchema.methods.toJSON = function() {
   let user = this;
   let userObj = user.toObject();
-  return _.pick(userObj, ['_id', 'email']);
+  return _.pick(userObj, ["_id", "email"]);
 };
 userSchema.methods.generateAuthToken = function() {
   let user = this;
@@ -57,6 +57,21 @@ userSchema.methods.generateAuthToken = function() {
     return token;
   });
 };
+userSchema.statics.findByToken = function(token) {
+  const User = this;
+  let decoded;
+  try {
+     decoded = jwt.verify(token, "AYYY");
+  } catch (e) {
+      return Promise.reject()
+  }
+  return User.findOne({
+    _id: decoded._id,
+    "tokens.token": token,
+    "tokens.access": "auth"
+  });
+};
+
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
