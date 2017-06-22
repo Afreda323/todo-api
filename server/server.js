@@ -26,7 +26,12 @@ app.post("/todos", (req, res) => {
   }
 });
 
-
+app.get('/todos', (req, res) => {
+    Todo.find({}, {_id: 0, __v: 0}, (err, todos) => {
+        if(err) {return res.status(400).send({err: 'Smething went wrong'})}
+        res.json({todos})
+    })
+})
 app.listen(3000, () => {
   console.log("Up on 3000");
 });
