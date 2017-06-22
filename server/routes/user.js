@@ -12,13 +12,13 @@ router.post("/", (req, res) => {
     });
     user
       .save()
-      .then(user => {
+      .then( user => {
         return user.generateAuthToken();
       })
-      .then(token => {
+      .then( token => {
         res.header("x-auth", token).json({ user });
       })
-      .catch(e => {
+      .catch( e => {
         console.log(e);
         res.status(400).json({ error: "Something went wrong" });
       });

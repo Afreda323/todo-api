@@ -3,6 +3,7 @@ const Schema = require("mongoose").Schema;
 const validator = require("validator");
 const jwt = require("jsonwebtoken");
 const _ = require("lodash");
+const bcrypt = require("bcrypt");
 //===========
 //   USER
 //===========
@@ -61,9 +62,9 @@ userSchema.statics.findByToken = function(token) {
   const User = this;
   let decoded;
   try {
-     decoded = jwt.verify(token, "AYYY");
+    decoded = jwt.verify(token, "AYYY");
   } catch (e) {
-      return Promise.reject()
+    return Promise.reject();
   }
   return User.findOne({
     _id: decoded._id,
@@ -71,7 +72,17 @@ userSchema.statics.findByToken = function(token) {
     "tokens.access": "auth"
   });
 };
-
+userSchema.pre("save", function(next) {
+  const user = this;
+  if (user.isModified("password")) {
+    bcrypt.hash(user.password, 10, function(err, hash) {
+      user.password = hash;
+      next();
+    });
+  } else {
+    next();
+  }
+});
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
