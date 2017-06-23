@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
 mongoose.Promise = global.Promise;
-mongoose.connect(process.env.MONGODB_URI || process.env.PROD_MONGODB);
+mongoose.connect(process.env.MONGODB_URI);
 
 module.exports = mongoose;
